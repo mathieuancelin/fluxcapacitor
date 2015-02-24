@@ -78,21 +78,21 @@ FluxCapacitor.createEvent = function(name: string): Event
 FluxCapacitor.withDebug = function(debug: bool): FluxCapacitor
 FluxCapacitor.lodash = { ... }
 
-Dispatcher.on = function(channel: string, callback: function): function()
+Dispatcher.on = function(channel: string, callback: function): function
 Dispatcher.off = function(channel: string, callback: function): void
 Dispatcher.trigger = function(channel: string, payload: object): void
 
 Action = function(payload: object): void
-Action.listen = function(callback: function): function()
+Action.listen = function(callback: function): function
 Action.off = function(callback: function): void
 
-Actions.listenTo = function(target: object, [config: object]): void
+Actions.listenTo = function(target: object, [config: object]): function
 
 Event = function(payload: object): void
-Event.listen = function(callback: function): function()
+Event.listen = function(callback: function): function
 Event.off = function(callback: function): void
 
-Events.listenTo = function(target: object, [config: object]): function()
+Events.listenTo = function(target: object, [config: object]): function
 ```
 
 
