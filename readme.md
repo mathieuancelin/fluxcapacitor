@@ -16,7 +16,7 @@ npm install fluxcapacitor --save
 const FluxCapacitor = require('fluxcapacitor');
 const _ = FluxCapacitor.lodash;
 
-var users = [];
+let users = [];
 
 const actions = FluxCapacitor.createActions([
   'createUser',
