@@ -2,6 +2,10 @@ var _ = require('lodash');
 
 var debug = false;
 
+function capitalize(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 function Dispatcher(log) {
   var callbacks = {};
   return {
@@ -61,7 +65,9 @@ function MultiDispatcher(arr, dispatcherName, log) {
         api[key].listen(obj[actualFuncName]);
       });
     } else {
-      _.chain(_.keys(obj)).map(function(key) { 
+      _.chain(_.keys(obj)).map(function(key) {
+        return 'on' + capitalize(key);
+      }).map(function(key) { 
         return obj[key]; 
       }).filter(function(attr) { 
         return _.isFunction(attr); 
@@ -124,8 +130,13 @@ function invariantLog(condition, message, a, b, c, d, e, f, g, h, i, j, k, l, m,
   if (!condition) {
     var args = [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p];
     var argIndex = 0;
-    console.log("Violation : " + message.replace(/%s/g, function() { return args[argIndex++]; }));
+    console.error("Violation : " + message.replace(/%s/g, function() { return args[argIndex++]; }));
   }
+}
+
+function createStore(actions, store) {
+  actions.listenTo(store);
+  return store;
 }
 
 exports.invariant = invariant;
@@ -140,6 +151,8 @@ exports.createEvents = Events;
 exports.Actions = Actions;
 exports.Events = Events;
 exports.Dispatcher = Dispatcher;
+exports.createStore = createStore;
+exports.Store = createStore;
 exports.lodash = _;
 
 exports.createAction = function(name) {
