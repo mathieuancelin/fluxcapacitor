@@ -57,7 +57,9 @@ function MultiDispatcher(arr, dispatcherName, log) {
     };
     return ret;
   }
-
+  if (_.isObject(arr)) {
+    arr = _.keys(arr);
+  }
   var api = {};
   _.each(arr, function(name) {
     api[name] = action(name);
