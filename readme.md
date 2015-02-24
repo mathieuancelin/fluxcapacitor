@@ -11,44 +11,49 @@ npm install fluxcapacitor --save
 ## Exemple
 
 ```javascript
-var FluxCapacitor = require('fluxcapacitor');
-var _ = FluxCapacitor.lodash;
+'use strict';
 
-var users [];
+const FluxCapacitor = require('fluxcapacitor');
+const _ = FluxCapacitor.lodash;
 
-var actions = FluxCapacitor.createActions([
+var users = [];
+
+const actions = FluxCapacitor.createActions([
   'createUser',
   'deleteUser',
   'updateUser'
 ]);
 
-var events = FluxCapacitor.createEvents([
+const events = FluxCapacitor.createEvents([
   'notifyUserListUpdated'
 ]);
 
-events.notifyUserListUpdated.listen(function() {
-  console.log(users);
-});
+const unsubscribe = events.notifyUserListUpdated.listen(() => console.log(users));  
 
-actions.createUser.listen(function(user) {
+const unsubscribe1 = actions.createUser.listen(user => {
   users.push(user);
   events.notifyUserListUpdated();
 });
 
-actions.deleteUser.listen(function(user) {
-  users = _.filter(users, u => user._id === u._id);
+const unsubscribe2 = actions.deleteUser.listen(user => {
+  users = users.filter(u => user._id !== u._id);
   events.notifyUserListUpdated();
 });
 
-actions.updateUser.listen(function(user) {
-  users = _.merge(_.findWhere(users, { _id: user._id }), user);
+const unsubscribe3 = actions.updateUser.listen(user => {
+  users = users.map(u => u._id === user._id ? user : u);
   events.notifyUserListUpdated();
 });
 
-var id = FluxCapacitor.uuid();
+const id = FluxCapacitor.uuid();
 actions.createUser({ _id: id, name: 'John Doe', age: 42 });
-actions.updateUser({ _id: id, age: 52 });
+actions.updateUser({ _id: id, name: 'John Doe', age: 52 });
 actions.deleteUser({ _id: id });
+
+unsubscribe();
+unsubscribe1();
+unsubscribe2();
+unsubscribe3();
 ```
 
 ## API
@@ -73,21 +78,21 @@ FluxCapacitor.createEvent = function(name: string): Event
 FluxCapacitor.withDebug = function(debug: bool): FluxCapacitor
 FluxCapacitor.lodash = { ... }
 
-Dispatcher.on = function(channel: string, callback: function): void
+Dispatcher.on = function(channel: string, callback: function): function()
 Dispatcher.off = function(channel: string, callback: function): void
 Dispatcher.trigger = function(channel: string, payload: object): void
 
 Action = function(payload: object): void
-Action.listen = function(callback: function): void
+Action.listen = function(callback: function): function()
 Action.off = function(callback: function): void
 
 Actions.listenTo = function(target: object, [config: object]): void
 
 Event = function(payload: object): void
-Event.listen = function(callback: function): void
+Event.listen = function(callback: function): function()
 Event.off = function(callback: function): void
 
-Events.listenTo = function(target: object, [config: object]): void
+Events.listenTo = function(target: object, [config: object]): function()
 ```
 
 

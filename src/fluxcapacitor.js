@@ -8,10 +8,13 @@ function capitalize(string) {
 
 function Dispatcher(log) {
   var callbacks = {};
-  return {
+  var api = {
     on: function(name, callback) {
       var events = callbacks[name] || (callbacks[name] = []);
       events.push(callback);
+      return function() {
+        api.off(name, callback);
+      };
     },
     off: function(name, callback) {
       var events = callbacks[name] || [];
@@ -30,7 +33,8 @@ function Dispatcher(log) {
         callback(name, payload);
       }); 
     }
-  }; 
+  };
+  return api; 
 };
 
 function MultiDispatcher(arr, dispatcherName, log) {
@@ -44,9 +48,12 @@ function MultiDispatcher(arr, dispatcherName, log) {
     };
     ret.listen = function(callback) {
       dispatcher.on(dispatcherName + "." + name, callback);
+      return function() {
+        ret.off(callback);
+      };
     };
     ret.off = function(callback) {
-      dispatcher.on(dispatcherName + "." + name, callback);
+      dispatcher.off(dispatcherName + "." + name, callback);
     };
     return ret;
   }
@@ -55,14 +62,15 @@ function MultiDispatcher(arr, dispatcherName, log) {
   _.each(arr, function(name) {
     api[name] = action(name);
   });
-  api.bindTo = function(obj, config) { // TODO : on...
+  api.bindTo = function(obj, config) { 
+    var subscriptions = [];
     if (config) {
       _.chain(_.keys(config)).filter(function(key) {
         var actualFuncName = config[key];
-        return _.isFunction(obj[actualFuncName]);
+        return _.isFunction(obj[actualFuncName]) || _.isFunction(actualFuncName);
       }).each(function(key) {
         var actualFuncName = config[key];
-        api[key].listen(obj[actualFuncName]);
+        subscriptions.push(api[key].listen(_.isFunction(actualFuncName) ? actualFuncName.bind(obj) : obj[actualFuncName].bind(obj)));
       });
     } else {
       _.chain(_.keys(obj)).map(function(key) {
@@ -72,9 +80,14 @@ function MultiDispatcher(arr, dispatcherName, log) {
       }).filter(function(attr) { 
         return _.isFunction(attr); 
       }).each(function(func) {
-        api[key].listen(func); 
+        subscriptions.push(api[key].listen(func.bind(obj))); 
       });
     }
+    return function() {
+      _.each(subscriptions, function(unsubscribe) {
+        unsubscribe();
+      });
+    };
   };
   return api;
 }
