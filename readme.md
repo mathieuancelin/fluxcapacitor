@@ -62,10 +62,12 @@ FluxCapacitor.keyMirror = function(keys: object): object
 FluxCapacitor.dispatcher = function(): Dispatcher
 FluxCapacitor.createDispatcher = function(): Dispatcher
 FluxCapacitor.Dispatcher = function(): Dispatcher;
-FluxCapacitor.createActions = function(names: array): object
-FluxCapacitor.createEvents = function(names: array): object
-FluxCapacitor.Actions = function(names: array): object
-FluxCapacitor.Events = function(names: array): object
+FluxCapacitor.createStore = function(actions: Actions, store: object): object
+FluxCapacitor.Store = function(actions: Actions, store: object): object
+FluxCapacitor.createActions = function(names: array): Actions
+FluxCapacitor.createEvents = function(names: array): Events
+FluxCapacitor.Actions = function(names: array): Actions
+FluxCapacitor.Events = function(names: array): Events
 FluxCapacitor.createAction = function(name: string): Action
 FluxCapacitor.createEvent = function(name: string): Event
 FluxCapacitor.withDebug = function(debug: bool): FluxCapacitor
@@ -78,12 +80,14 @@ Dispatcher.trigger = function(channel: string, payload: object): void
 Action = function(payload: object): void
 Action.listen = function(callback: function): void
 Action.off = function(callback: function): void
-Action.listenTo = function(target: object, [config: object]): void
+
+Actions.listenTo = function(target: object, [config: object]): void
 
 Event = function(payload: object): void
 Event.listen = function(callback: function): void
 Event.off = function(callback: function): void
-Event.listenTo = function(target: object, [config: object]): void
+
+Events.listenTo = function(target: object, [config: object]): void
 ```
 
 
