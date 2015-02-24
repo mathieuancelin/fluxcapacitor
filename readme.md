@@ -72,7 +72,7 @@ const store = FluxCapacitor.createStore(actions, {
   }
 });
 
-var unsubscribe4 = store.events.notifyUserListUpdated.listen(() => console.log(store.users));  
+const unsubscribe4 = store.events.notifyUserListUpdated.listen(() => console.log(store.users));  
 actions.createUser({ _id: id, name: 'John Doe', age: 42 });
 actions.updateUser({ _id: id, name: 'John Doe', age: 52 });
 actions.deleteUser({ _id: id });
