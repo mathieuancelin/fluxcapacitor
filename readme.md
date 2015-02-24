@@ -2,6 +2,12 @@
 
 Just a bunch of tools to implement apps the Flux way.
 
+## Install
+
+```
+npm install fluxcapacitor --save
+```
+
 ## Exemple
 
 ```javascript
