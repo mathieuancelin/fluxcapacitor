@@ -71,17 +71,22 @@ function MultiDispatcher(arr, dispatcherName, log) {
       }).each(function(key) {
         var actualFuncName = config[key];
         subscriptions.push(api[key].listen(_.isFunction(actualFuncName) ? actualFuncName.bind(obj) : obj[actualFuncName].bind(obj)));
-      });
+      }).value();
     } else {
-      _.chain(_.keys(obj)).map(function(key) {
-        return 'on' + capitalize(key);
-      }).map(function(key) { 
-        return obj[key]; 
-      }).filter(function(attr) { 
-        return _.isFunction(attr); 
-      }).each(function(func) {
-        subscriptions.push(api[key].listen(func.bind(obj))); 
-      });
+      _.chain(_.keys(api)).filter(function(key) {
+        if (key === 'bindTo') return false;
+        return true;
+      }).map(function(key) {
+        return {
+          f: obj['on' + capitalize(key)],
+          key: key,
+          handler: 'on' + capitalize(key)
+        };
+      }).filter(function(struct) { 
+        return _.isFunction(struct.f); 
+      }).each(function(struct) {
+        subscriptions.push(api[struct.key].listen(struct.f.bind(obj))); 
+      }).value();
     }
     return function() {
       _.each(subscriptions, function(unsubscribe) {
@@ -148,7 +153,8 @@ function invariantLog(condition, message, a, b, c, d, e, f, g, h, i, j, k, l, m,
 }
 
 function createStore(actions, store) {
-  actions.listenTo(store);
+  var unsubscribe = actions.bindTo(store);
+  store.unsubscribe = unsubscribe;
   return store;
 }
 

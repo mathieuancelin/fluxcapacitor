@@ -54,6 +54,31 @@ unsubscribe();
 unsubscribe1();
 unsubscribe2();
 unsubscribe3();
+
+const store = FluxCapacitor.createStore(actions, {
+  users: [],
+  events: FluxCapacitor.createEvents(['notifyUserListUpdated']),
+  onCreateUser: (user) => {
+    this.users.push(user);
+    this.events.notifyUserListUpdated();
+  },
+  onDeleteUser: (user) => {
+    this.users = this.users.filter(u => user._id !== u._id);
+    this.events.notifyUserListUpdated();
+  },
+  onUpdateUser: (user) => {
+    this.users = this.users.map(u => u._id === user._id ? user : u);
+    this.events.notifyUserListUpdated();
+  }
+});
+
+var unsubscribe4 = store.events.notifyUserListUpdated.listen(() => console.log(store.users));  
+actions.createUser({ _id: id, name: 'John Doe', age: 42 });
+actions.updateUser({ _id: id, name: 'John Doe', age: 52 });
+actions.deleteUser({ _id: id });
+
+store.unsubscribe();
+unsubscribe4();
 ```
 
 ## API
@@ -86,13 +111,13 @@ Action = function(payload: object): void
 Action.listen = function(callback: function): function
 Action.off = function(callback: function): void
 
-Actions.listenTo = function(target: object, [config: object]): function
+Actions.bindTo = function(target: object, [config: object]): function
 
 Event = function(payload: object): void
 Event.listen = function(callback: function): function
 Event.off = function(callback: function): void
 
-Events.listenTo = function(target: object, [config: object]): function
+Events.bindTo = function(target: object, [config: object]): function
 ```
 
 
