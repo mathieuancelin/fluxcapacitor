@@ -1,0 +1,34 @@
+{
+  "name": "fluxcapacitor",
+  "version": "1.0.0",
+  "description": "A bunch of tools to implement apps the Flux way",
+  "license": "Apache-2.0",
+  "main": "src/fluxcapacitor.js",
+  "homepage": "https://github.com/mathieuancelin/fluxcapacitor",
+  "author": "Mathieu ANCELIN",
+  "keywords": [
+    "Flux",
+    "React",
+    "Dispatcher",
+    "Events",
+    "Actions",
+    "Store",
+    "lodash"
+  ],
+  "dependencies": {
+    "lodash": "^3.3.0"
+  },
+  "devDependencies": {
+    "browserify": "^9.0.3",
+    "uglify-js": "^2.4.16",
+    "watchify": "^2.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mathieuancelin/fluxcapacitor.git"
+  },
+  "scripts": {
+    "build": "browserify --standalone FluxCapacitor src/fluxcapacitor.js -o dist/fluxcapacitor.js; uglifyjs dist/fluxcapacitor.js --source-map dist/fluxcapacitor.min.map --source-map-url fluxcapacitor.min.map -p 1 -mc -o dist/fluxcapacitor.min.js",
+    "watch": "watchify --standalone FluxCapacitor src/fluxcapacitor.js -o dist/fluxcapacitor.js --debug --verbose"
+  }
+}
