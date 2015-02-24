@@ -1,6 +1,6 @@
 {
   "name": "fluxcapacitor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A bunch of tools to implement apps the Flux way",
   "license": "Apache-2.0",
   "main": "src/fluxcapacitor.js",
