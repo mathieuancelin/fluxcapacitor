@@ -1,6 +1,6 @@
 {
   "name": "fluxcapacitor",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A bunch of tools to implement apps the Flux way",
   "license": "Apache-2.0",
   "main": "src/fluxcapacitor.js",
@@ -16,7 +16,8 @@
     "lodash"
   ],
   "dependencies": {
-    "lodash": "^3.3.0"
+    "lodash": "^3.3.0",
+    "q": "^1.2.0"
   },
   "devDependencies": {
     "browserify": "^9.0.3",

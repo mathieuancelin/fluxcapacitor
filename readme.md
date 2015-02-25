@@ -106,14 +106,17 @@ FluxCapacitor.lodash = { ... }
 Dispatcher.on = function(channel: string, callback: function): function
 Dispatcher.off = function(channel: string, callback: function): void
 Dispatcher.trigger = function(channel: string, payload: object): void
+Dispatcher.triggerAsync = function(channel: string, payload: object): Promise
 
 Action = function(payload: object): void
+Action.triggerAsync = function(payload: object): Promise
 Action.listen = function(callback: function): function
 Action.off = function(callback: function): void
 
 Actions.bindTo = function(target: object, [config: object]): function
 
 Event = function(payload: object): void
+Event.triggerAsync = function(payload: object): Promise
 Event.listen = function(callback: function): function
 Event.off = function(callback: function): void
 

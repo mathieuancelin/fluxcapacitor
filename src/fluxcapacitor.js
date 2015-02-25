@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var Q = require('q');
 
 var debug = false;
 
@@ -21,6 +22,24 @@ function Dispatcher(log) {
       callbacks[name] = _.filter(events, function(cb) {
         return cb !== callback; 
       });
+    },
+    triggerAsync: function(name, payload) {
+      var deferred = Q.defer();
+      var cb = this.trigger;
+      _.defer(function() {
+        try {
+          cb(name, payload);
+          if (payload.__response) {
+            deferred.resolve(payload.__response);
+          } else {
+            deferred.resolve({});
+          }
+        } catch(e) {
+          console.error(e);
+          deferred.reject(new Error(e));
+        }
+      });
+      return deferred.promise;
     },
     trigger: function(name, payload) {
       if (log || debug) console.log('[FLUX CAPACITOR] Notify "' + name + '" with payload : ' + JSON.stringify(payload));
@@ -45,6 +64,10 @@ function MultiDispatcher(arr, dispatcherName, log) {
     var ret = function() {
       var arg = arguments[0] || {};
       dispatcher.trigger(dispatcherName + "." + name, arg);
+    };
+    ret.triggerAsync = function() {
+      var arg = arguments[0] || {};
+      return dispatcher.triggerAsync(dispatcherName + "." + name, arg);
     };
     ret.listen = function(callback) {
       dispatcher.on(dispatcherName + "." + name, callback);
@@ -155,12 +178,29 @@ function invariantLog(condition, message, a, b, c, d, e, f, g, h, i, j, k, l, m,
 }
 
 function createStore(actions, store) {
-  var unsubscribe = actions.bindTo(store);
-  store.init = function() {
-    store.shutdown = actions.bindTo(store);  
-  };
-  store.shutdown = unsubscribe;
-  return store;
+  if (_.isArray(actions)) {
+    var unsubscribe = function() {};
+    store.init = function() {
+      var subs = [];
+      _.each(actions, function(a) {
+        subs.push(a.bindTo(store));
+      });
+      unsubscribe = function() {
+        _.each(subs, function(s) { s(); });
+      }
+      store.shutdown = unsubscribe;
+    };
+    store.init();
+    store.shutdown = unsubscribe;
+    return store;
+  } else {
+    var unsubscribe = actions.bindTo(store);
+    store.init = function() {
+      store.shutdown = actions.bindTo(store);  
+    };
+    store.shutdown = unsubscribe;
+    return store;
+  }
 }
 
 exports.invariant = invariant;

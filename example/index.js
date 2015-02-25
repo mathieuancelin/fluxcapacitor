@@ -1,5 +1,7 @@
 'use strict';
 
+FluxCapacitor.withDebug(true);
+
 var _ = FluxCapacitor.lodash;
 
 var users = [];
