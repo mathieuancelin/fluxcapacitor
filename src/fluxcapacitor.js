@@ -203,6 +203,60 @@ function createStore(actions, store) {
   }
 }
 
+exports.createAction = function(name) {
+  return Actions([name])[name];
+};
+
+exports.createEvent = function(name) {
+  return Events([name])[name];
+};
+
+var reactMixins = {
+  AutoListen: {
+    componentDidMount: function() {
+      var that = this;
+      var subs = [];
+      var eventsArr = that.listenTo || [];
+      eventsArr.forEach(function(e) {
+        subs.push(e.bindTo(that));
+      });
+      that.__unsubscribe = function() {
+        subs.forEach(function(s) { s(); });
+      };
+    },
+    componentWillUnmount: function() {
+      this.__unsubscribe();
+    }
+  },
+  AutoListenAt: function(event, name) {
+    var regName = '__registrationAutoListenAt' + name + Date.now();
+    return {
+      componentDidMount: function() {
+        this[regName] = event.listen(this[name] || function() { console.log('Missing function "' + name + '"'); });
+      },
+      componentWillUnmount: function() {
+        this[regName]();
+      }
+    };
+  },
+  AutoState: function(event, name) {
+    var regName = '__registrationAutoState' + name + Date.now();
+    return {
+      componentDidMount: function() {
+        var that = this;
+        that[regName] = event.listen(function(payload) {
+          var newState = {};
+          newState[name] = payload;
+          that.setState(newState);
+        });
+      },
+      componentWillUnmount: function() {
+        this[regName]();
+      }
+    };
+  }
+};
+
 exports.invariant = invariant;
 exports.invariantLog = invariantLog;
 exports.uuid = uuid;
@@ -218,14 +272,8 @@ exports.Dispatcher = Dispatcher;
 exports.createStore = createStore;
 exports.Store = createStore;
 exports.lodash = _;
-
-exports.createAction = function(name) {
-  return Actions([name])[name];
-};
-
-exports.createEvent = function(name) {
-  return Events([name])[name];
-};
+exports.q = Q;
+exports.Mixins = reactMixins;
 
 exports.withDebug = function(d) {
   debug = d;

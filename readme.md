@@ -81,6 +81,57 @@ store.shutdown();
 unsubscribe4();
 ```
 
+## React mixins
+
+```javascript 
+var myStore = FluxCapacitor.createStore(actions, {
+  events: FluxCapacitor.createEvents(['somethingChanged']),
+  ...
+});
+
+var myOtherStore = FluxCapacitor.createStore(actions, {
+  events: FluxCapacitor.createEvents(['otherSomethingChanged']),
+  ...
+});
+
+var Component1 = React.createClass({
+  mixins: [FluxCapacitor.Mixins.AutoListenAt(myStore.events.somethingChanged, 'onSomethingChanged')],
+  onSomethingChanged: function(something) {
+    this.setState({
+      something: something
+    });
+  },
+  render: function() {
+    ...
+  }
+});
+
+var Component2 = React.createClass({
+  mixins: [FluxCapacitor.Mixins.AutoListen],
+  listenTo: [myStore.events, myOtherStore.events]
+  onSomethingChanged: function(something) {
+    this.setState({
+      something: something
+    });
+  },
+  onOtherSomethingChanged: function(othersomething) {
+    this.setState({
+      othersomething: othersomething
+    });
+  },
+  render: function() {
+      ...
+  }
+});
+
+var Component3 = React.createClass({
+  mixins: [FluxCapacitor.Mixins.AutoState(myStore.events.somethingChanged, 'something')],
+  render: function() {
+    // here use this.state.something
+  }
+});
+```
+
 ## API
 
 ```javascript
@@ -102,6 +153,11 @@ FluxCapacitor.createAction = function(name: string): Action
 FluxCapacitor.createEvent = function(name: string): Event
 FluxCapacitor.withDebug = function(debug: bool): FluxCapacitor
 FluxCapacitor.lodash = { ... }
+FluxCapacitor.Mixins = {
+  AutoListen: object
+  AutoListenAt: function(event: Event, functionName: string)
+  AutoState: function(event: Event, stateFieldName: string)
+}
 
 Dispatcher.on = function(channel: string, callback: function): function
 Dispatcher.off = function(channel: string, callback: function): void

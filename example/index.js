@@ -56,7 +56,7 @@ actions.deleteUser({ _id: id });
 
 id = FluxCapacitor.uuid();
 
-var store = FluxCapacitor.createStore(actions, {
+var store = FluxCapacitor.createStore([actions], {
   users: [],
   events: FluxCapacitor.createEvents(['notifyUserListUpdated']),
   getUsers: function() {
