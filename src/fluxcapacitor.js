@@ -78,6 +78,8 @@ function MultiDispatcher(arr, dispatcherName, log) {
     ret.off = function(callback) {
       dispatcher.off(dispatcherName + "." + name, callback);
     };
+    ret.__name = name;
+    ret.__action = true;
     return ret;
   }
   if (!_.isArray(arr) && _.isObject(arr)) {
@@ -87,6 +89,7 @@ function MultiDispatcher(arr, dispatcherName, log) {
   _.each(arr, function(name) {
     api[name] = action(name);
   });
+  api.__actions = true;
   api.bindTo = function(obj, config) { 
     var subscriptions = [];
     if (config) {
@@ -238,6 +241,56 @@ var reactMixins = {
         this[regName]();
       }
     };
+  },
+  AutoStates: {
+    componentDidMount: function() {
+      var that = this;
+      var subs = [];
+      var eventsArr = that.stateFrom || [];
+      _.each(eventsArr, function(event) {
+        var actions = [];
+        if (event.__actions) {
+          _.each(event, function(value, key) {
+            if (value.__action) actions.push(value);
+          });
+        } else if (event.__action) {
+          actions.push(event);  
+        }
+        _.each(actions, function(action) {
+          subs.push(action.listen(function(payload) {
+            var name = action.__name;
+            name = name.toLowerString();
+            if (_.startWith(name, 'on')) {
+              name = name.slice(2);
+            }
+            if (_.startWith(name, 'set')) {
+              name = name.slice(3);
+            }
+            if (_.startWith(name, 'notify')) {
+              name = name.slice(6);
+            }
+            if (_.endWidth(name, 'change')) {
+              name = name.slice(0, name.length - 6);
+            }
+            if (_.endWidth(name, 'changed')) {
+              name = name.slice(0, name.length - 7);
+            }
+            if (_.endWidth(name, 'updated')) {
+              name = name.slice(0, name.length - 7);
+            }
+            var newState = {};
+            newState[name] = payload;
+            that.setState(newState);
+          }));
+        });
+      });
+      that.__unsubscribe = function() {
+        subs.forEach(function(s) { s(); });
+      };
+    },
+    componentWillUnmount: function() {
+      this.__unsubscribe();
+    }
   },
   AutoState: function(event, name) {
     var regName = '__registrationAutoState' + name + Date.now();
