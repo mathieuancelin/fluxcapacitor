@@ -77,7 +77,7 @@ actions.createUser({ _id: id, name: 'John Doe', age: 42 });
 actions.updateUser({ _id: id, name: 'John Doe', age: 52 });
 actions.deleteUser({ _id: id });
 
-store.unsubscribe();
+store.shutdown();
 unsubscribe4();
 ```
 

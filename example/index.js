@@ -14,7 +14,16 @@ var events = FluxCapacitor.createEvents([
   'notifyUserListUpdated'
 ]);
 
-var unsubscribe = events.notifyUserListUpdated.listen(function() { console.log(users); });  
+function message(m) {
+  return '<p style="background-color: lightgrey">' + m + '</p>';
+}
+
+var app = document.getElementById('app') ;
+
+var unsubscribe = events.notifyUserListUpdated.listen(function() { 
+  console.log(users); 
+  app.innerHTML = app.innerHTML + message(JSON.stringify(users));
+});  
 
 var unsubscribe1 = actions.createUser.listen(function(user) {
   users.push(user);
@@ -43,9 +52,14 @@ unsubscribe3();
 
 actions.deleteUser({ _id: id });
 
+id = FluxCapacitor.uuid();
+
 var store = FluxCapacitor.createStore(actions, {
   users: [],
   events: FluxCapacitor.createEvents(['notifyUserListUpdated']),
+  getUsers: function() {
+    return this.users;
+  },
   onCreateUser: function(user) {
     this.users.push(user);
     this.events.notifyUserListUpdated();
@@ -60,7 +74,13 @@ var store = FluxCapacitor.createStore(actions, {
   }
 });
 
-store.events.notifyUserListUpdated.listen(function() { console.log('[STORE] ' + JSON.stringify(store.users)); });  
+var unsubscribe4 = store.events.notifyUserListUpdated.listen(function() { 
+  console.log('[STORE] ' + JSON.stringify(store.getUsers()));
+  app.innerHTML = app.innerHTML + message('[STORE] ' + JSON.stringify(store.getUsers()));
+});  
 actions.createUser({ _id: id, name: 'John Doe', age: 42 });
 actions.updateUser({ _id: id, name: 'John Doe', age: 52 });
 actions.deleteUser({ _id: id });
+
+store.shutdown();
+unsubscribe4();

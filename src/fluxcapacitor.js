@@ -57,7 +57,7 @@ function MultiDispatcher(arr, dispatcherName, log) {
     };
     return ret;
   }
-  if (_.isObject(arr)) {
+  if (!_.isArray(arr) && _.isObject(arr)) {
     arr = _.keys(arr);
   }
   var api = {};
@@ -156,7 +156,10 @@ function invariantLog(condition, message, a, b, c, d, e, f, g, h, i, j, k, l, m,
 
 function createStore(actions, store) {
   var unsubscribe = actions.bindTo(store);
-  store.unsubscribe = unsubscribe;
+  store.init = function() {
+    store.shutdown = actions.bindTo(store);  
+  };
+  store.shutdown = unsubscribe;
   return store;
 }
 
