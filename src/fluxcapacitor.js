@@ -259,7 +259,6 @@ var reactMixins = {
         _.each(actions, function(action) {
           subs.push(action.listen(function(payload) {
             var name = action.__name;
-            name = name.toLowerString();
             if (_.startWith(name, 'on')) {
               name = name.slice(2);
             }
@@ -269,13 +268,13 @@ var reactMixins = {
             if (_.startWith(name, 'notify')) {
               name = name.slice(6);
             }
-            if (_.endWidth(name, 'change')) {
+            if (_.endWidth(name, 'Change')) {
               name = name.slice(0, name.length - 6);
             }
-            if (_.endWidth(name, 'changed')) {
+            if (_.endWidth(name, 'Changed')) {
               name = name.slice(0, name.length - 7);
             }
-            if (_.endWidth(name, 'updated')) {
+            if (_.endWidth(name, 'Updated')) {
               name = name.slice(0, name.length - 7);
             }
             var newState = {};
