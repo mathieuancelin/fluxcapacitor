@@ -259,24 +259,25 @@ var reactMixins = {
         _.each(actions, function(action) {
           subs.push(action.listen(function(payload) {
             var name = action.__name;
-            if (_.startWith(name, 'on')) {
+            if (_.startsWith(name, 'on')) {
               name = name.slice(2);
             }
-            if (_.startWith(name, 'set')) {
+            if (_.startsWith(name, 'set')) {
               name = name.slice(3);
             }
-            if (_.startWith(name, 'notify')) {
+            if (_.startsWith(name, 'notify')) {
               name = name.slice(6);
             }
-            if (_.endWidth(name, 'Change')) {
+            if (_.endsWith(name, 'Change')) {
               name = name.slice(0, name.length - 6);
             }
-            if (_.endWidth(name, 'Changed')) {
+            if (_.endsWith(name, 'Changed')) {
               name = name.slice(0, name.length - 7);
             }
-            if (_.endWidth(name, 'Updated')) {
+            if (_.endsWith(name, 'Updated')) {
               name = name.slice(0, name.length - 7);
             }
+            name = name.charAt(0).toLowerCase() + name.slice(1);
             var newState = {};
             newState[name] = payload;
             that.setState(newState);
