@@ -55,7 +55,7 @@ unsubscribe1();
 unsubscribe2();
 unsubscribe3();
 
-const store = FluxCapacitor.createStore(actions, {
+const store = FluxCapacitor.createStore([actions], {
   users: [],
   events: FluxCapacitor.createEvents(['notifyUserListUpdated']),
   onCreateUser: (user) => {
@@ -71,6 +71,8 @@ const store = FluxCapacitor.createStore(actions, {
     this.events.notifyUserListUpdated();
   }
 });
+
+// FluxCapacitor.createStore([actions], function(theStore) { ... }) works too !
 
 const unsubscribe4 = store.events.notifyUserListUpdated.listen(() => console.log(store.users));  
 actions.createUser({ _id: id, name: 'John Doe', age: 42 });
