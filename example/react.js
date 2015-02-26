@@ -62,7 +62,7 @@ var Users = React.createClass({
 var LogItem = React.createClass({
   render: function() {
     return (
-      <li><span style={{ color: 'white', font: 'Consolas' }}><span style={{ color: 'white' }}>[{this.props.level}]</span> : {this.props.message}</span></li>
+      <li><span style={{ color: 'white', font: 'Consolas' }}><span style={{ color: 'yellow' }}>[{this.props.level}]</span> : {this.props.message}</span></li>
     );
   }
 });
