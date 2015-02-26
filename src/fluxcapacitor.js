@@ -10,7 +10,13 @@ function capitalize(string) {
 function Dispatcher(log) {
   var callbacks = {};
   var api = {
-    on: function(name, callback) {
+    on: function(name, token, callback) {
+      if (!callback) {
+        callback = token;
+        if (!callback.__uuid) callback.__uuid = uuid();
+      } else {
+        callback.__uuid = token;  
+      }
       var events = callbacks[name] || (callbacks[name] = []);
       events.push(callback);
       return function() {
@@ -43,9 +49,25 @@ function Dispatcher(log) {
     },
     trigger: function(name, payload) {
       if (log || debug) console.log('[FLUX CAPACITOR] Notify "' + name + '" with payload : ' + JSON.stringify(payload));
+      var current;
+      var done = {};
       var events = callbacks[name] || [];
+      var call = function(cb) {
+        if (cb && !done[cb.__uuid]) {
+          invariant(cb.__uuid !== current, 'Cyclic dependency while waiting on %s === %s', cb.__uuid, current);
+          current = cb.__uuid;
+          cb(payload, waitFor);
+          done[cb.__uuid] = true;
+        }  
+      }
+      var waitFor = function(arr) {
+        _.each(arr, function(k) {
+          if (k.token) k = k.token;
+          call(_.findWhere(events, { __uuid: k }));
+        });
+      };
       _.each(events, function(callback) {
-        callback(payload);
+        call(callback);
       });  
       var all = callbacks['*'] || [];
       _.each(all, function(callback) {
@@ -69,7 +91,12 @@ function MultiDispatcher(arr, dispatcherName, log) {
       var arg = arguments[0] || {};
       return dispatcher.triggerAsync(dispatcherName + "." + name, arg);
     };
-    ret.listen = function(callback) {
+    ret.listen = function(token, callback) {
+      if (!callback) {
+        callback = token;
+      } else {
+        callback.__uuid = token;
+      }
       dispatcher.on(dispatcherName + "." + name, callback);
       return function() {
         ret.off(callback);
@@ -91,6 +118,12 @@ function MultiDispatcher(arr, dispatcherName, log) {
   });
   api.__actions = true;
   api.bindTo = function(obj, config) { 
+    var token = uuid();
+    if (arguments.length >= 2 && _.isString(arguments[0])) {
+      token = arguments[0];
+      obj = arguments[1];
+      config = arguments[2];
+    }
     var subscriptions = [];
     if (config) {
       _.chain(_.keys(config)).filter(function(key) {
@@ -98,7 +131,7 @@ function MultiDispatcher(arr, dispatcherName, log) {
         return _.isFunction(obj[actualFuncName]) || _.isFunction(actualFuncName);
       }).each(function(key) {
         var actualFuncName = config[key];
-        subscriptions.push(api[key].listen(_.isFunction(actualFuncName) ? actualFuncName.bind(obj) : obj[actualFuncName].bind(obj)));
+        subscriptions.push(api[key].listen(token, _.isFunction(actualFuncName) ? actualFuncName.bind(obj) : obj[actualFuncName].bind(obj)));
       }).value();
     } else {
       _.chain(_.keys(api)).filter(function(key) {
@@ -113,7 +146,7 @@ function MultiDispatcher(arr, dispatcherName, log) {
       }).filter(function(struct) { 
         return _.isFunction(struct.f); 
       }).each(function(struct) {
-        subscriptions.push(api[struct.key].listen(struct.f.bind(obj))); 
+        subscriptions.push(api[struct.key].listen(token, struct.f.bind(obj))); 
       }).value();
     }
     return function() {
@@ -181,12 +214,20 @@ function invariantLog(condition, message, a, b, c, d, e, f, g, h, i, j, k, l, m,
 }
 
 function createStore(actions, store) {
+  var token = uuid();
+  if (_.isFunction(store)) {
+    var api = {};
+    api.token = token;
+    store(api);
+    store = api;
+  }
+  store.token = token;
   if (_.isArray(actions)) {
     var unsubscribe = function() {};
     store.init = function() {
       var subs = [];
       _.each(actions, function(a) {
-        subs.push(a.bindTo(store));
+        subs.push(a.bindTo(token, store));
       });
       unsubscribe = function() {
         _.each(subs, function(s) { s(); });
@@ -197,9 +238,9 @@ function createStore(actions, store) {
     store.shutdown = unsubscribe;
     return store;
   } else {
-    var unsubscribe = actions.bindTo(store);
+    var unsubscribe = actions.bindTo(token, store);
     store.init = function() {
-      store.shutdown = actions.bindTo(store);  
+      store.shutdown = actions.bindTo(token, store);  
     };
     store.shutdown = unsubscribe;
     return store;
