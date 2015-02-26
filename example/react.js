@@ -35,7 +35,7 @@ var store = FluxCapacitor.createStore([actions], {
 var User = React.createClass({
   render: function() {
     return (
-      <li><span style={{ color: 'white', font: 'Consolas' }}>User : {this.props.name} is {this.props.age} years old</span></li>
+      <li><span style={{ color: 'white', font: 'Consolas' }}>[{this.props._id}] {this.props.name} is {this.props.age} years old</span></li>
     );
   }
 });
@@ -52,7 +52,7 @@ var Users = React.createClass({
     return (
       <ul>
         {this.state.userList.map(function(user) {
-          return <User name={user.name} age={user.age} />
+          return <User name={user.name} age={user.age} _id={user._id} />
         })}
       </ul>
     );
@@ -76,7 +76,6 @@ var Logger = React.createClass({
     };
   },
   onNotifyMessageAdded: function(user) {
-    console.log('added')
     this.setState({
       userList: this.state.userList.concat([user])
     });
@@ -92,9 +91,40 @@ var Logger = React.createClass({
   }
 });
 
+var CommandBar = React.createClass({
+  ids: [],
+  _create: function() {
+    var i = FluxCapacitor.uuid();
+    this.ids.push(i);
+    actions.createUser({ _id: i, name: 'John Doe', age: 42 })
+  },
+  _update: function() {
+    var i = this.ids.pop();
+    if (i) {
+      actions.updateUser({ _id: i, name: 'John Doe', age: 52 });
+      this.ids.reverse();
+      this.ids.push(i);
+      this.ids.reverse();
+    }
+  },
+  _delete: function() {
+    var i = this.ids.pop();
+    if (i) {
+      actions.deleteUser({ _id: i });
+    }
+  },
+  render: function() {
+    return (
+      <div>
+        <button type="button" onClick={this._create}>Create</button>
+        <button type="button" onClick={this._update}>Update</button>
+        <button type="button" onClick={this._delete}>Delete</button>
+      </div>
+    );
+  }
+});
 
-
-React.render(<div><Users /><br /><Logger /></div>, document.getElementById('app'));
+React.render(<div><CommandBar /><Users /><br/><hr/><br/><Logger /></div>, document.getElementById('app'));
 
 store.events.notifyUserListUpdated.listen(function() { 
   console.log('[STORE] ' + JSON.stringify(store.users));
@@ -105,7 +135,7 @@ setTimeout(function() {
   actions.updateUser({ _id: id, name: 'John Doe', age: 52 });
   setTimeout(function() {
     actions.deleteUser({ _id: id });
-  }, 2000);
-}, 2000);
+  }, 1000);
+}, 1000);
 
 
