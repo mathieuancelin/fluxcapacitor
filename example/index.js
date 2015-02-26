@@ -86,3 +86,26 @@ actions.deleteUser({ _id: id });
 
 store.shutdown();
 unsubscribe4();
+
+
+var testActions = FluxCapacitor.createActions(['myAction']);
+var store3 = FluxCapacitor.createStore([testActions], function(api) {
+  api.onMyAction = function(payload, waitFor) {
+    waitFor([store1, store2]);
+    console.log('callback from store3');
+  }; 
+});
+var store2 = FluxCapacitor.createStore([testActions], function(api) {
+  api.onMyAction = function(payload, waitFor) {
+    console.log('callback from store2');
+  }; 
+});
+var store1 = FluxCapacitor.createStore([testActions], function(api) {
+  api.onMyAction = function(payload, waitFor) {
+    console.log('callback from store1');
+  }; 
+});
+
+testActions.myAction({});
+
+
