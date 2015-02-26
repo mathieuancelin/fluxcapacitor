@@ -10,11 +10,12 @@ var actions = FluxCapacitor.createActions([
   'updateUser'
 ]);
 
-id = FluxCapacitor.uuid();
-
 var store = FluxCapacitor.createStore([actions], {
   users: [],
-  events: FluxCapacitor.createEvents(['notifyUserListUpdated', 'notifyMessageAdded']),
+  events: FluxCapacitor.createEvents([
+    'notifyUserListUpdated', 
+    'notifyMessageAdded'
+  ]),
   onCreateUser: function(user) {
     this.users.push(user);
     this.events.notifyUserListUpdated(this.users);
@@ -125,17 +126,3 @@ var CommandBar = React.createClass({
 });
 
 React.render(<div><CommandBar /><Users /><br/><hr/><br/><Logger /></div>, document.getElementById('app'));
-
-store.events.notifyUserListUpdated.listen(function() { 
-  console.log('[STORE] ' + JSON.stringify(store.users));
-});  
-
-actions.createUser({ _id: id, name: 'John Doe', age: 42 });
-setTimeout(function() {
-  actions.updateUser({ _id: id, name: 'John Doe', age: 52 });
-  setTimeout(function() {
-    actions.deleteUser({ _id: id });
-  }, 1000);
-}, 1000);
-
-
