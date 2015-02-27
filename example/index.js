@@ -102,6 +102,7 @@ var store2 = FluxCapacitor.createStore([testActions], function(api) {
 });
 var store1 = FluxCapacitor.createStore([testActions], function(api) {
   api.onMyAction = function(payload, waitFor) {
+    waitFor([store2]);
     console.log('callback from store1');
   }; 
 });

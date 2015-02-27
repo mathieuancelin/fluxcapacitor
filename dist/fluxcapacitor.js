@@ -13482,6 +13482,8 @@ function capitalize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+var pending = {};
+
 function Dispatcher(log) {
   var callbacks = {};
   var api = {
@@ -13529,15 +13531,18 @@ function Dispatcher(log) {
       var events = callbacks[name] || [];
       var call = function(cb) {
         if (cb && !done[cb.__uuid]) {
-          invariant(cb.__uuid !== current, 'Cyclic dependency while waiting on %s === %s', cb.__uuid, current);
+          invariant(cb.__uuid !== current, 'Cyclic dependency detected, current action directly wait for itself : %s', cb.__uuid);
+          invariant(!pending[cb.__uuid], 'Cyclic dependency detected, you are already waiting for %s', cb.__uuid);
           current = cb.__uuid;
+          pending[cb.__uuid] = true;
           cb(payload, waitFor);
+          delete pending[cb.__uuid];
           done[cb.__uuid] = true;
         }  
       }
       var waitFor = function(arr) {
         _.each(arr, function(k) {
-          if (k.token) k = k.token;
+          if (k.__store && k.token) k = k.token;
           call(_.findWhere(events, { __uuid: k }));
         });
       };
@@ -13697,6 +13702,7 @@ function createStore(actions, store) {
     store = api;
   }
   store.token = token;
+  store.__store = true;
   if (_.isArray(actions)) {
     var unsubscribe = function() {};
     store.init = function() {
