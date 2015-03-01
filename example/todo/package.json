@@ -1,0 +1,26 @@
+{
+  "name": "todomvc",
+  "version": "1.0.0",
+  "description": "Example FluxCapacitor usage.",
+  "main": "js/app.js",
+  "dependencies": {
+    "react": "~ 0.12.2",
+    "object-assign": "^1.0.0",  
+    "fluxcapacitor": "~1.0.8"
+  },
+  "devDependencies": {
+    "browserify": "^9.0.3",
+    "uglify-js": "^2.4.16",
+    "watchify": "^2.4.0",
+    "reactify": "~1.0.0"
+  },
+  "scripts": {
+    "build": "browserify js/app.js -o dist/bundle.js; uglifyjs js/bundle.js --source-map js/bundle.min.map --source-map-url bundle.min.map -p 1 -mc -o js/bundle.min.js",
+    "start": "watchify js/app.js -o js/bundle.js --debug --verbose"
+  },
+  "browserify": {
+    "transform": [
+      ["reactify", {"es6": true}]
+    ]
+  }
+}
