@@ -60,9 +60,12 @@ function Dispatcher(log) {
           invariant(!pending[cb.__uuid], 'Cyclic dependency detected, you are already waiting for %s', cb.__uuid);
           current = cb.__uuid;
           pending[cb.__uuid] = true;
-          cb(payload, waitFor);
-          delete pending[cb.__uuid];
-          done[cb.__uuid] = true;
+          try {
+            cb(payload, waitFor);
+          } finally {
+            delete pending[cb.__uuid];
+            done[cb.__uuid] = true;
+          } 
         }  
       }
       var waitFor = function(arr) {
