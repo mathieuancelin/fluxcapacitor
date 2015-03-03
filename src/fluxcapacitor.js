@@ -54,10 +54,12 @@ function Dispatcher(log) {
       var current;
       var done = {};
       var events = callbacks[name] || [];
-      var call = function(cb) {
+      var call = function(cb, waiting) {
         if (cb && !done[cb.__uuid]) {
-          invariant(cb.__uuid !== current, 'Cyclic dependency detected, current action directly wait for itself : %s', cb.__uuid);
-          invariant(!pending[cb.__uuid], 'Cyclic dependency detected, you are already waiting for %s', cb.__uuid);
+          if (waiting) {
+            invariant(waiting && cb.__uuid !== current, 'Cyclic dependency detected, current action directly wait for itself : %s', cb.__uuid);
+            invariant(waiting && !pending[cb.__uuid], 'Cyclic dependency detected, you are already waiting for %s', cb.__uuid);
+          }
           current = cb.__uuid;
           pending[cb.__uuid] = true;
           try {
@@ -71,7 +73,7 @@ function Dispatcher(log) {
       var waitFor = function(arr) {
         _.each(arr, function(k) {
           if (k.__store && k.token) k = k.token;
-          call(_.findWhere(events, { __uuid: k }));
+          call(_.findWhere(events, { __uuid: k }), true);
         });
       };
       _.each(events, function(callback) {
