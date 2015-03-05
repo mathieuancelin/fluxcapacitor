@@ -13473,6 +13473,8 @@ return Q;
 
 }).call(this,require('_process'))
 },{"_process":1}],4:[function(require,module,exports){
+"use strict";
+
 var _ = require('lodash');
 var Q = require('q');
 
@@ -13842,15 +13844,10 @@ exports.invariantLog = invariantLog;
 exports.uuid = uuid;
 exports.mirror = keyMirror;
 exports.keyMirror = keyMirror;
-exports.dispatcher = Dispatcher;
 exports.createDispatcher = Dispatcher;
 exports.createActions = Actions;
 exports.createEvents = Events;
-exports.Actions = Actions;
-exports.Events = Events;
-exports.Dispatcher = Dispatcher;
 exports.createStore = createStore;
-exports.Store = createStore;
 exports.lodash = _;
 exports.q = Q;
 exports.Mixins = reactMixins;

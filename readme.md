@@ -132,6 +132,19 @@ var Component3 = React.createClass({
     // here use this.state.something
   }
 });
+
+var Component4 = React.createClass({
+  mixins: [FluxCapacitor.Mixins.AutoStates],
+  stateFrom: [store.events.notifyUserListUpdated], // notify and updated are escaped as well as on, set, change, changed
+  getInitialState: function() {
+    return {
+      userList: []
+    };
+  },
+  render: function() {
+    // use this.state.userList
+  }
+});
 ```
 
 ## API
@@ -140,17 +153,11 @@ var Component3 = React.createClass({
 FluxCapacitor.invariant = function(condition: bool, message: string, args...): void
 FluxCapacitor.invariantLog = function(condition: bool, message: string, args...): void
 FluxCapacitor.uuid = function(): String
-FluxCapacitor.mirror = function(keys: object): object
 FluxCapacitor.keyMirror = function(keys: object): object
-FluxCapacitor.dispatcher = function(): Dispatcher
 FluxCapacitor.createDispatcher = function(): Dispatcher
-FluxCapacitor.Dispatcher = function(): Dispatcher;
 FluxCapacitor.createStore = function(actions: Actions, store: object): object
-FluxCapacitor.Store = function(actions: Actions, store: object): object
 FluxCapacitor.createActions = function(names: array): Actions
 FluxCapacitor.createEvents = function(names: array): Events
-FluxCapacitor.Actions = function(names: array): Actions
-FluxCapacitor.Events = function(names: array): Events
 FluxCapacitor.createAction = function(name: string): Action
 FluxCapacitor.createEvent = function(name: string): Event
 FluxCapacitor.withDebug = function(debug: bool): FluxCapacitor
@@ -159,6 +166,7 @@ FluxCapacitor.Mixins = {
   AutoListen: object
   AutoListenAt: function(event: Event, functionName: string)
   AutoState: function(event: Event, stateFieldName: string)
+  AutoStates: object
 }
 
 Dispatcher.on = function(channel: string, callback: function): function
