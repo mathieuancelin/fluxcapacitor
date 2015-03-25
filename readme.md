@@ -83,9 +83,66 @@ store.shutdown();
 unsubscribe4();
 ```
 
+You can use ES6 class style for Stores
+
+```javascript
+'use strict';
+
+const FluxCapacitor = require('fluxcapacitor');
+const _ = FluxCapacitor.lodash;
+const id = FluxCapacitor.uuid();
+
+const actions = FluxCapacitor.createActions([
+  'createUser',
+  'deleteUser',
+  'updateUser'
+]);
+
+class TestStore extends FluxCapacitor.Store {
+
+  constructor(actionArray) {
+    super(actionArray);
+    this.users = [];
+    this.events = FluxCapacitor.createEvents(['notifyUserListUpdated']);
+  }
+
+  getUsers() {
+    return this.users;
+  }
+
+  onCreateUser(user) {
+    this.users.push(user);
+    this.events.notifyUserListUpdated();
+  }
+
+  onDeleteUser(user) {
+    this.users = this.users.filter((u) => user._id !== u._id);
+    this.events.notifyUserListUpdated();
+  }
+
+  onUpdateUser(user) {
+    this.users = this.users.map((u) => u._id === user._id ? user : u);
+    this.events.notifyUserListUpdated();
+  }
+}
+
+const store = new TestStore([actions]);
+
+const unsubscribe4 = store.events.notifyUserListUpdated.listen(() => {
+  console.log('[STORE] ' + JSON.stringify(store.getUsers()));
+});
+
+actions.createUser({ _id: id, name: 'Jane Doe', age: 42 });
+actions.updateUser({ _id: id, name: 'Jane Doe', age: 52 });
+actions.deleteUser({ _id: id });
+
+store.shutdown();
+unsubscribe4();
+```
+
 ## React mixins
 
-```javascript 
+```javascript
 var myStore = FluxCapacitor.createStore(actions, {
   events: FluxCapacitor.createEvents(['somethingChanged']),
   ...
@@ -156,6 +213,7 @@ FluxCapacitor.uuid = function(): String
 FluxCapacitor.keyMirror = function(keys: object): object
 FluxCapacitor.createDispatcher = function(): Dispatcher
 FluxCapacitor.createStore = function(actions: Actions, store: object): object
+FluxCapacitor.Store = Store(actions: Actions) // ES6 class to inherit
 FluxCapacitor.createActions = function(names: array): Actions
 FluxCapacitor.createEvents = function(names: array): Events
 FluxCapacitor.createAction = function(name: string): Action
@@ -188,6 +246,3 @@ Event.off = function(callback: function): void
 
 Events.bindTo = function(target: object, [config: object]): function
 ```
-
-
-

@@ -19,7 +19,7 @@ function Dispatcher(log) {
         callback = token;
         if (!callback.__uuid) callback.__uuid = uuid();
       } else {
-        callback.__uuid = token;  
+        callback.__uuid = token;
       }
       var events = callbacks[name] || (callbacks[name] = []);
       events.push(callback);
@@ -30,7 +30,7 @@ function Dispatcher(log) {
     off: function(name, callback) {
       var events = callbacks[name] || [];
       callbacks[name] = _.filter(events, function(cb) {
-        return cb !== callback; 
+        return cb !== callback;
       });
     },
     triggerAsync: function(name, payload) {
@@ -69,8 +69,8 @@ function Dispatcher(log) {
           } finally {
             delete pending[cb.__uuid];
             done[cb.__uuid] = true;
-          } 
-        }  
+          }
+        }
       }
       var waitFor = function(arr) {
         _.each(arr, function(k) {
@@ -80,14 +80,14 @@ function Dispatcher(log) {
       };
       _.each(events, function(callback) {
         call(callback);
-      });  
+      });
       var all = callbacks['*'] || [];
       _.each(all, function(callback) {
         callback(name, payload);
-      }); 
+      });
     }
   };
-  return api; 
+  return api;
 };
 
 function MultiDispatcher(arr, dispatcherName, log) {
@@ -129,7 +129,7 @@ function MultiDispatcher(arr, dispatcherName, log) {
     api[name] = action(name);
   });
   api.__actions = true;
-  api.bindTo = function(obj, config) { 
+  api.bindTo = function(obj, config) {
     var token = uuid();
     if (arguments.length >= 2 && _.isString(arguments[0])) {
       token = arguments[0];
@@ -155,10 +155,10 @@ function MultiDispatcher(arr, dispatcherName, log) {
           key: key,
           handler: 'on' + capitalize(key)
         };
-      }).filter(function(struct) { 
-        return _.isFunction(struct.f); 
+      }).filter(function(struct) {
+        return _.isFunction(struct.f);
       }).each(function(struct) {
-        subscriptions.push(api[struct.key].listen(token, struct.f.bind(obj))); 
+        subscriptions.push(api[struct.key].listen(token, struct.f.bind(obj)));
       }).value();
     }
     return function() {
@@ -237,7 +237,7 @@ function createStore(actions, store) {
   store.__store = true;
   if (_.isArray(actions)) {
     var unsubscribe = function() {};
-    store.init = function() {
+    store.init = store.init || function() {
       var subs = [];
       _.each(actions, function(a) {
         subs.push(a.bindTo(token, store));
@@ -248,14 +248,14 @@ function createStore(actions, store) {
       store.shutdown = unsubscribe;
     };
     store.init();
-    store.shutdown = unsubscribe;
+    store.shutdown = store.shutdown || unsubscribe;
     return store;
   } else {
     var unsubscribe = actions.bindTo(token, store);
-    store.init = function() {
-      store.shutdown = actions.bindTo(token, store);  
+    store.init = store.init || function() {
+      store.shutdown = actions.bindTo(token, store);
     };
-    store.shutdown = unsubscribe;
+    store.shutdown = store.shutdown || unsubscribe;
     return store;
   }
 }
@@ -308,7 +308,7 @@ var reactMixins = {
             if (value.__action) actions.push(value);
           });
         } else if (event.__action) {
-          actions.push(event);  
+          actions.push(event);
         }
         _.each(actions, function(action) {
           subs.push(action.listen(function(payload) {
@@ -376,6 +376,9 @@ exports.createStore = createStore;
 exports.lodash = _;
 exports.q = Q;
 exports.Mixins = reactMixins;
+exports.Store = function(actions) {
+  FluxCapacitor.createStore(actions, this);
+};
 
 exports.withDebug = function(d) {
   debug = d;

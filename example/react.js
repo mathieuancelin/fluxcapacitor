@@ -13,7 +13,7 @@ var actions = FluxCapacitor.createActions([
 var store = FluxCapacitor.createStore([actions], {
   users: [],
   events: FluxCapacitor.createEvents([
-    'notifyUserListUpdated', 
+    'notifyUserListUpdated',
     'notifyMessageAdded'
   ]),
   onCreateUser: function(user) {
