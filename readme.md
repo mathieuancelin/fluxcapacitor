@@ -13,7 +13,8 @@ npm install fluxcapacitor --save
 ```javascript
 'use strict';
 
-const FluxCapacitor = require('fluxcapacitor');
+import FluxCapacitor from 'fluxcapacitor';
+
 const _ = FluxCapacitor.lodash;
 
 let users = [];
@@ -88,8 +89,8 @@ You can use ES6 class style for Stores
 ```javascript
 'use strict';
 
-const FluxCapacitor = require('fluxcapacitor');
-const _ = FluxCapacitor.lodash;
+import FluxCapacitor from 'fluxcapacitor';
+
 const id = FluxCapacitor.uuid();
 
 const actions = FluxCapacitor.createActions([
@@ -129,7 +130,7 @@ class TestStore extends FluxCapacitor.Store {
 const store = new TestStore([actions]);
 
 const unsubscribe4 = store.events.notifyUserListUpdated.listen(() => {
-  console.log('[STORE] ' + JSON.stringify(store.getUsers()));
+  console.log(`[STORE] ${JSON.stringify(store.getUsers())}`);
 });
 
 actions.createUser({ _id: id, name: 'Jane Doe', age: 42 });
